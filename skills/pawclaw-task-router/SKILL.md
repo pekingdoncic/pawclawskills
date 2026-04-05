@@ -1,11 +1,13 @@
 ---
 name: pawclaw-task-router
-description: Classify messy user input for PawClaw into Big Task, Small Task, Idea, progress update, focus request, or profile signal; produce concise structured output for the app layer and separate memory-worthy context from volatile task state.
+description: Classify messy user input for PawClaw into Big Task, Small Task, Idea, progress update, focus request, or profile signal, and return exactly one OpenclawBehaviorEnvelope JSON object.
 ---
 
 # PawClaw Task Router
 
 Use this skill when the user sends quick capture text, voice transcripts, or mixed conversational input that needs immediate classification.
+
+All outputs must follow [protocol/OpenclawBehaviorEnvelope.md](../../protocol/OpenclawBehaviorEnvelope.md).
 
 ## Purpose
 
@@ -31,8 +33,7 @@ Before classifying:
 1. Read `USER.md`
 2. Read today's `memory/YYYY-MM-DD.md` if it exists
 3. Read `MEMORY.md`
-
-Use context to avoid re-asking obvious questions.
+4. Read `CAT.md`
 
 ### 2. Determine the primary intent
 
@@ -86,17 +87,20 @@ Use when the user explicitly or implicitly asks for help starting now.
 
 Use when the message reveals stable preference or durable context worth storing.
 
-### 4. Produce output for the app bridge
+## Output Contract
 
-Prefer a compact structure with:
+Return exactly one JSON object and nothing else.
 
-1. `reply_to_user`
-2. `cat_action`
-3. `ui_mode`
-4. `task_payload`
-5. `memory_ops`
+Use the `OpenclawBehaviorEnvelope` shape.
 
-Keep the user-facing reply short. The app can render details from structured payloads.
+Hard rules:
+
+- no prose outside JSON
+- no markdown fences
+- `reply.text` must be one sentence only
+- `reply.text` must be no more than 28 Chinese characters
+- `ui.showCountdown` must always be `false`
+- `ui.maxOptions` must never exceed `3`
 
 ## Task Payload Guidance
 
@@ -104,21 +108,22 @@ For `big-task`, include:
 
 - `type`
 - `title`
-- `why_it_matters`
-- `suggested_next_step`
+- `whyItMatters`
+- `suggestedNextStep`
+- `nextStepEstimatedMinutes` with a value no greater than 30
 
 For `small-task`, include:
 
 - `type`
 - `title`
-- `estimated_minutes`
-- `startable_now`
+- `estimatedMinutes`
+- `startableNow`
 
 For `idea`, include:
 
 - `type`
 - `title`
-- `save_only`
+- `saveOnly`
 
 For `progress-update`, include:
 
@@ -126,12 +131,24 @@ For `progress-update`, include:
 - `status`
 - `blocker` if any
 
+For all task objects:
+
+- do not expose chain-of-thought
+- do not expose internal scoring
+- do not expose traits or growth values
+- do not expose XP, level, or bond-meter language
+
 ## Routing Rules
 
-- If a message contains both an idea and a stable preference, route the idea to task payload and the preference to `memory_ops`.
+- If a message contains both an idea and a stable preference, route the idea to `task` and the preference to `memory`.
 - If the user seems overloaded, prefer one concrete next step over elaborate classification language.
 - When the message is ambiguous between `big-task` and `small-task`, use the 30-minute threshold from the PRD.
 - Avoid pretending certainty. Estimate conservatively.
+- When routing a `big-task`, always convert the first returned action into a sub-step that can fit within 30 minutes.
+- Use `reply.tone` from the selected archetype in `CAT.md`.
+- Use `animation.action = walk` by default.
+- Use `animation.action = jump` only for restrained completion punctuation.
+- Use `animation.action = run` only for explicit active user-initiated momentum.
 
 ## Field Guide
 

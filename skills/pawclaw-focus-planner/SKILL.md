@@ -1,11 +1,13 @@
 ---
 name: pawclaw-focus-planner
-description: Help a PawClaw user start work with the least friction possible; choose between a one-action short-window intervention and a 2-4 step focus plan for longer sessions, while returning cat-action signals that the UI can animate.
+description: Help a PawClaw user start work with the least friction possible and return exactly one OpenclawBehaviorEnvelope JSON object.
 ---
 
 # PawClaw Focus Planner
 
 Use this skill when the user wants to begin work now, or when the app needs a startable recommendation from existing context.
+
+All outputs must follow [protocol/OpenclawBehaviorEnvelope.md](../../protocol/OpenclawBehaviorEnvelope.md).
 
 ## Purpose
 
@@ -25,7 +27,8 @@ Before responding:
 1. Read `USER.md`
 2. Read today's `memory/YYYY-MM-DD.md` if it exists
 3. Read `MEMORY.md`
-4. Use app-provided task context if available
+4. Read `CAT.md`
+5. Use app-provided task context if available
 
 ### 2. Identify the current mode
 
@@ -60,39 +63,43 @@ Each step must be:
 - concrete
 - easy to begin
 - realistically matched to the time window
+- no longer than 30 minutes
+
+If a proposed step would exceed 30 minutes, split it again before returning it.
 
 Do not over-plan across multiple days unless the user asks.
 
-### 4. Map to cat feedback
+### 4. Map to envelope fields
 
-Choose the cat action by support state:
+Set:
 
-- startup friction: `gentle-check-in`
-- ready to begin: `focus-sit`
-- small completion: `celebrate-purr`
-- meaningful completion: `celebrate-hop`
-- passive support: `idle-soft`
-
-Also choose a `ui_mode`:
-
-- `companion-warm`
-- `focus-calm`
-- `review-soft`
+- `reply.tone` from the selected archetype in `CAT.md`
+- `animation.action = walk` for startup friction or passive support
+- `animation.action = jump` for restrained completion punctuation
+- `animation.action = run` only when the user is already moving into action
+- `animation.intensity = low` by default
+- `animation.intensity = medium` only for restrained completion or active momentum
+- `ui.uiMode = companion-warm` for soft guidance
+- `ui.uiMode = focus-calm` for active focus
+- `ui.screenMode = mode_b_companion` for emotional support
+- `ui.screenMode = mode_a_focus` for active focus work
+- `ui.showCountdown = false`
+- `ui.maxOptions = 1` by default
 
 ## Output Rules
 
-- Keep `reply_to_user` short enough for a mobile overlay.
+- Output exactly one JSON object and nothing else.
+- `reply.text` must be one sentence only and no more than 28 Chinese characters.
 - Lead with one clear action.
 - Explain why only if it helps compliance.
 - Avoid corporate coaching language and countdown pressure.
+- Do not tell the user how little time remains; tell them what to touch now.
+- `ui.maxOptions` must never exceed `3`.
 
 ## Product-Specific Rules
 
-- The cat is the emotional interface, not decoration. The reply should support the cat layer, not compete with it.
+- The cat is the emotional interface, not decoration.
 - Do not expose internal OpenClaw reasoning to the user.
 - If the user seems exhausted or stuck, shrink the task until it feels safely startable.
 - If the user asks for options, cap them at 2 or 3.
-
-## Field Guide
-
-Read [references/focus-modes.md](references/focus-modes.md) for examples.
+- For ADHD-friendly planning, every actionable slice must stay within the 30-minute rule.

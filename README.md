@@ -14,6 +14,8 @@ This repository is designed for one OpenClaw workspace per linked PawClaw user. 
 ```text
 pawclaw-openclaw-cloud/
 ├── README.md
+├── protocol/
+│   └── OpenclawBehaviorEnvelope.md
 ├── scripts/
 │   └── init-workspace.sh
 ├── skills/
@@ -42,9 +44,11 @@ The template supports the product direction described in the PawClaw PRD:
 - task routing across `Big Task`, `Small Task`, and `Idea`
 - two common support windows: under 30 minutes and 30 minutes or more
 - user-facing output plus UI-facing cat action signals
+- fixed cat archetype mapping with canonical IDs and colors
 
 ## Workspace Files
 
+- `protocol/OpenclawBehaviorEnvelope.md`: strict JSON contract for runtime outputs
 - `SOUL.md`: the companion identity, tone, and behavioral philosophy
 - `AGENTS.md`: operating rules, memory boundaries, and channel contract
 - `CAT.md`: current cat persona slots and UI action vocabulary
@@ -59,6 +63,7 @@ The template supports the product direction described in the PawClaw PRD:
 - `pawclaw-task-router`: classifies messy input into idea, task, focus request, or profile signal
 - `pawclaw-focus-planner`: generates one next action or a short step plan based on the available time window
 - `pawclaw-review-curator`: turns review messages into daily notes and promotable long-term insights
+- `pawclaw-silence-regulator`: handles low-pressure silent-state responses, micro-copy, and low-stimulation cat motion codes
 
 ## Quick Start
 

@@ -1,11 +1,13 @@
 ---
 name: pawclaw-review-curator
-description: Curate PawClaw review, reflection, and archive signals into daily memory and distilled long-term guidance; capture what helped, what blocked progress, and what should change next time without turning reflection into homework.
+description: Curate PawClaw review, reflection, and archive signals and return exactly one OpenclawBehaviorEnvelope JSON object.
 ---
 
 # PawClaw Review Curator
 
 Use this skill when the user finishes a task, abandons a task, reflects on a session, or when the app wants to generate daily or weekly review notes.
+
+All outputs must follow [protocol/OpenclawBehaviorEnvelope.md](../../protocol/OpenclawBehaviorEnvelope.md).
 
 ## Purpose
 
@@ -26,6 +28,7 @@ Before writing:
 1. Read `USER.md`
 2. Read today's `memory/YYYY-MM-DD.md` if it exists
 3. Read `MEMORY.md`
+4. Read `CAT.md`
 
 ### 2. Extract the smallest useful reflection
 
@@ -36,7 +39,7 @@ Prefer these questions, explicitly or implicitly:
 3. What blocked progress?
 4. What should be easier next time?
 
-Do not ask all four unless the product flow requires it. Often one or two are enough.
+Do not ask all four unless the product flow requires it.
 
 ### 3. Write to the right layer
 
@@ -58,13 +61,17 @@ Promote only:
 - durable time-of-day or environment patterns
 - stable response to cat tone or reminder style
 
-### 4. Optional summary generation
+### 4. Output Contract
 
-When the app needs a summary, keep it compact:
+Return exactly one JSON object and nothing else.
 
-- daily: timeline-friendly bullets
-- weekly: cat-companion tone with 2-4 insights
-- monthly: pattern summary, not diary replay
+Hard rules:
+
+- `reply.text` must be one sentence only and no more than 28 Chinese characters
+- `ui.showCountdown` must always be `false`
+- `ui.maxOptions` must never exceed `3`
+- `reply.tone` must be one allowed archetype
+- `animation.action` must be one allowed action
 
 ## Product-Specific Rules
 
@@ -72,14 +79,8 @@ When the app needs a summary, keep it compact:
 - Avoid scoreboards, ranking language, and pressure-heavy framing.
 - If the user abandoned the task, frame the archive as continuity, not failure.
 - Cat feedback should feel warm and quiet, not loud or gamified.
-
-## Preferred Output Shape
-
-1. `reply_to_user`
-2. `cat_action`
-3. `ui_mode`
-4. `task_payload` if a follow-up action exists
-5. `memory_ops`
+- Preferred completion signal is a soft warm glow with one restrained `jump`.
+- Do not expose traits, growth, XP, level, badge, or bond-meter state to the user.
 
 ## Field Guide
 
